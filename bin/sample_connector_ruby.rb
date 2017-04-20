@@ -1,4 +1,5 @@
 require 'yaml'
+require 'io/console'
 require_relative '../src/thin_connector.rb'
 
 ##################
@@ -9,7 +10,11 @@ def repl
   loop do
     print '> '
     cmd = gets
-    handle_command cmd
+    begin
+      handle_command cmd
+    rescue Exception => e
+      puts "Hmmm something went wrong: #{e}"
+    end
   end
 end
 
@@ -60,6 +65,12 @@ def get_user_input(item_name)
   if non_alpha_numeric_string(input) then '' else input end
 end
 
+def get_hidden_user_input(item_name)
+  print "Enter #{item_name} (typing hidden): "
+  input = STDIN.noecho(&:gets).chomp
+  puts ""
+  input
+end
 
 def non_alpha_numeric_string(str)
   0 == (str =~ /^\W+$/) || str.empty?
@@ -86,7 +97,7 @@ end
 def configure_application
   config = {}
   config[:gnip_username] = get_non_null_user_input 'gnip username'
-  config[:gnip_password] = get_non_null_user_input 'gnip password'
+  config[:gnip_password] = get_hidden_user_input 'gnip password'
   config[:gnip_url] = get_non_null_user_input 'gnip url'
   config[:log_level] = get_user_input_with_default 'debug level', 'debug'
   p config
@@ -233,7 +244,7 @@ end
 
 def setup_stream
   environment = ThinConnector::Environment.instance
-  url = 'https://stream.gnip.com:443/accounts/isaacs/publishers/twitter/streams/track/prod.json'
+  url = 'https://gnip-stream.twitter.com/stream/powertrack/accounts/go-code-wombat-soup/publishers/twitter/america.json'
   headers = {
       authorization: [environment.gnip_username, environment.gnip_password],
       'Accept-Encoding' => 'gzip,deflate,sdch'

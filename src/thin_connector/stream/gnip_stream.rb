@@ -2,6 +2,7 @@ require 'eventmachine'
 require 'em-http-request'
 require 'json'
 require 'yajl'
+require 'byebug'
 require_relative './stream_helper.rb'
 
 module ThinConnector
@@ -58,6 +59,7 @@ module ThinConnector
       private
 
       def connect_stream
+        puts 'Connecting'
         EM.run do
           http = EM::HttpRequest.new(@url, keep_alive: true,  inactivity_timeout: 2**16, connection_timeout: 100000).get(head: @headers)
           http.stream { |chunk| process_chunk(chunk) }
@@ -92,7 +94,8 @@ module ThinConnector
       end
 
       def handle_error(http_connection)
-        @logger.error('Error with http connection ' + http_connection.inspect)
+        puts('Error with http connection ' + http_connection.inspect)
+        # byebug
         reconnect
       end
 
