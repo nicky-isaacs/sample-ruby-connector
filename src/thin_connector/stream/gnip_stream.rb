@@ -51,10 +51,6 @@ module ThinConnector
         @on_connection_close = block
       end
 
-      def on_error(&block)
-        @on_error = block
-      end
-
       private
 
       def connect_stream

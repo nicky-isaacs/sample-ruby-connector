@@ -17,10 +17,10 @@ module ThinConnector
       end
 
       def start
-        @stream.start
+        @stream.start{ |data| p data }
         run_thread = Thread.new do
           while not stopped
-            p stream.pop
+
           end
         end
       end
