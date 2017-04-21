@@ -100,7 +100,7 @@ def configure_application
   config[:gnip_password] = get_hidden_user_input 'gnip password'
   config[:gnip_url] = get_non_null_user_input 'gnip url'
   config[:log_level] = get_user_input_with_default 'debug level', 'debug'
-  p config
+  p config.select{ |key, val| key != :gnip_password}
   write_out_config application_configuration_path, environment_configuration(config)
 end
 
