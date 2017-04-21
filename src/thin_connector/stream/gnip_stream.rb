@@ -16,7 +16,6 @@ module ThinConnector
       attr_accessor :headers, :options, :url, :string_buffer
       attr_reader :username, :password
 
-      @@buffer_mutex = Mutex.new
       def initialize(url=nil, headers={})
         @logger = ThinConnector::Logger.new
         @url = url
@@ -59,7 +58,6 @@ module ThinConnector
       private
 
       def connect_stream
-        puts 'Connecting'
         EM.run do
           http = EM::HttpRequest.new(@url, keep_alive: true,  inactivity_timeout: 2**16, connection_timeout: 100000).get(head: @headers)
           http.stream { |chunk| process_chunk(chunk) }
@@ -94,8 +92,7 @@ module ThinConnector
       end
 
       def handle_error(http_connection)
-        puts('Error with http connection ' + http_connection.inspect)
-        # byebug
+        @logger.warn('Error with http connection ' + http_connection.inspect)
         reconnect
       end
 
@@ -108,35 +105,9 @@ module ThinConnector
         @stopped
       end
 
-      def username=(username)
-        @username = username
-        @headers.merge!({ username: username })
-      end
-
-      def password=(pw)
-        @password = pw
-        @headers.merge!({ password: pw })
-      end
-
-      def post_init
-        @parser = Yajl::Parser.new(:symbolize_keys => true)
-      end
-
       def object_parsed(obj)
         @processor.call obj
       end
-
-      def connection_completed
-        # once a full JSON object has been parsed from the stream
-        # object_parsed will be called, and passed the constructed object
-        @parser.on_parse_complete = method(:object_parsed)
-      end
-
-      def receive_data(data)
-        # continue passing chunks
-        @parser << data
-      end
-
     end
   end
 end

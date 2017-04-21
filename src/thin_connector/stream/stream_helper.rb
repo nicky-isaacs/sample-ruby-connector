@@ -15,7 +15,6 @@ module ThinConnector
 
       def max_reconnect_time
         MAX_RECONNECT_SECONDS
-        # ThinConnector::Environment.max_reconnect_time || MAX_RECONNECT_SECONDS
       end
     end
   end
